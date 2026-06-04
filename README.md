@@ -26,7 +26,7 @@
 The solution is a full **model zoo** (CNNs, CRNNs, and Vision Transformers) culminating in a **weighted soft-voting ensemble** that blends the three strongest models — reaching **97.40% full-code accuracy** on the validation split.
 
 - **Task** — image → ordered 6-character sequence
-- **Charset** — `0123456789ABCDEFGHJKMNPQRSTUVWXYZ` (33 classes; `I`, `L`, `O` excluded to avoid ambiguity)
+- **Charset** — `0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ` 
 - **Code length** — 6 characters
 - **Metric** — **Character Error Rate (CER)**, Levenshtein-based (lower is better)
 
@@ -100,7 +100,7 @@ It is fully self-contained — it redefines the three model classes and all help
 > The final ensemble — built from tuned ("Advanced") variants of Models 1–3 — is the strongest configuration and the basis for the submitted predictions. It generates **5,000 test predictions** written to [`Result/submission_AryanSharma_24113024.csv`](./Result/submission_AryanSharma_24113024.csv).
 
 **Takeaways**
-- 🪶 The **lightweight CRNN-MobileNet** is the single best model (90.69% acc, 0.0161 CER) at just **1.77M** trainable params — small *and* accurate, so it carries the largest ensemble weight.
+- 🪶 The **lightweight CRNN-MobileNet** is the single best model (93.69% acc, 0.0161 CER) at just **1.77M** trainable params — small *and* accurate, so it carries the largest ensemble weight.
 - 🤝 **Ensembling lifts accuracy substantially** — from 90.69% (best single) → **97.40%** (tuned blend).
 - 🧊 The generic **ViT-Small** struggled on this distorted-captcha distribution (data-hungry); the **custom strip-token AdvancedViTCaptcha** is the captcha-specific transformer alternative.
 

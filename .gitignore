@@ -222,3 +222,4 @@ data/
 
 # Model weights / artifacts
 Artifacts/
+*.zip

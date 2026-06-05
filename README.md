@@ -10,7 +10,7 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![torchvision](https://img.shields.io/badge/torchvision-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/vision/)
 [![timm](https://img.shields.io/badge/timm-ViT-blue)](https://github.com/huggingface/pytorch-image-models)
-[![Best Acc](https://img.shields.io/badge/Full--code%20Acc-97.40%25-brightgreen)](#-results)
+[![Best Acc](https://img.shields.io/badge/Full--code%20Acc-99.90%25-brightgreen)](#-results)
 [![License](https://img.shields.io/badge/License-See%20LICENSE-green)](./LICENSE)
 
 **📦 [Dataset + Pretrained Artifacts (Google Drive)](https://drive.google.com/drive/folders/1BmYQBdOoLxwWSHTTVDNipFGZD1N2IcfF?usp=sharing)**
@@ -23,7 +23,7 @@
 
 **VisionDecode** tackles the CIG AI/ML challenge **PS-1: Distorted Visual Sequence Pattern Recognition** — given a distorted grayscale image containing a fixed-length character code, predict the exact ordered sequence. The images are deliberately corrupted with **blur, occlusion, overlapping characters, warping, and visual noise**, making naive OCR useless.
 
-The solution is a full **model zoo** (CNNs, CRNNs, and Vision Transformers) culminating in a **weighted soft-voting ensemble** that blends the three strongest models — reaching **97.40% full-code accuracy** on the validation split.
+The solution is a full **model zoo** (CNNs, CRNNs, and Vision Transformers) culminating in a **weighted soft-voting ensemble** that blends three strong CRNN models — reaching **99.90% full-code accuracy** (full-code accuracy of **99.89999%**, val CER **0.00016675**) on the validation split.
 
 - **Task** — image → ordered 6-character sequence
 - **Charset** — `0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ` 
@@ -66,13 +66,19 @@ All models share a common training/eval pipeline (charset encoding, CER, dataloa
 
 ### 🏆 Final Ensemble
 
-The production model ([`NoteBook/Final_Model.ipynb`](./NoteBook/Final_Model.ipynb)) is a **weighted soft-vote** over the three strongest classification models:
+The production model ([`NoteBook/Final_Model.ipynb`](./NoteBook/Final_Model.ipynb)) is a **weighted soft-vote** over three strong **CRNN (CNN backbone → BiGRU)** classification models:
+
+| Model | Backbone + head | Weight | Trainable Params |
+|-------|-----------------|-------:|-----------------:|
+| Model 1 | ShuffleNetV2-x1.0 → 4-layer BiGRU | 0.25 | 3.04M |
+| Model 2 | MobileNetV3-Small → 4-layer BiGRU | 0.25 | 2.37M |
+| Model 3 | MobileNetV3-Large → 4-layer BiGRU | 0.50 | 4.71M |
 
 ```
-prediction = argmax( 0.25·EfficientNet  +  0.25·CRNN-BiGRU  +  0.50·CRNN-MobileNet )   # per character position
+prediction = argmax( 0.25·CRNN-ShuffleNetV2  +  0.25·CRNN-MobileNetV3-Small  +  0.50·CRNN-MobileNetV3-Large )   # per character position
 ```
 
-It is fully self-contained — it redefines the three model classes and all helpers so the checkpoints load cleanly, reports validation CER/accuracy per-model vs. the blend, and writes the final submission CSV.
+It is fully self-contained — it redefines the three model classes and all helpers (charset, CER, dataloaders, classifier trainer), trains/loads the checkpoints, reports validation CER/accuracy per-model vs. the blend, and writes the final submission CSV.
 
 ---
 
@@ -91,18 +97,23 @@ It is fully self-contained — it redefines the three model classes and all help
 | 6 | Ensemble (soft-vote, top-3) | **0.0089** | 94.80% | — |
 | 7 | CRNN-ResNet + BiGRU | 0.2001 | 24.56% | 10.78M |
 
-### 🥇 Final tuned ensemble (`Final_Model.ipynb`)
+### 🥇 Final ensemble (`Final_Model.ipynb`)
 
-| Ensemble | Members (weights) | Full-code Acc ↑ |
-|----------|-------------------|----------------:|
-| **Final Weighted Soft-Vote** | EfficientNet (0.25) + CRNN-EfficientNet (0.25) + CRNN-MobileNet (0.50) | **🟢 97.40%** |
+Per-member validation performance (best checkpoint) and the final weighted blend:
 
-> The final ensemble — built from tuned ("Advanced") variants of Models 1–3 — is the strongest configuration and the basis for the submitted predictions. It generates **5,000 test predictions** written to [`Result/submission_AryanSharma_24113024.csv`](./Result/submission_AryanSharma_24113024.csv).
+| Model | Backbone → head | Weight | Val CER ↓ | Full-code Acc ↑ | Params |
+|-------|-----------------|-------:|----------:|----------------:|-------:|
+| Model 1 | CRNN-ShuffleNetV2 → BiGRU | 0.25 | 0.0050 | 97.05% | 3.04M |
+| Model 2 | CRNN-MobileNetV3-Small → BiGRU | 0.25 | 0.0101 | 94.25% | 2.37M |
+| Model 3 | CRNN-MobileNetV3-Large → BiGRU | 0.50 | 0.0003 | 99.85% | 4.71M |
+| **Final Weighted Soft-Vote** | **All three (0.25 / 0.25 / 0.50)** | — | **0.00016675** | **🟢 99.89999%** |
+
+> The final ensemble is the strongest configuration and the basis for the submitted predictions — reaching a **full-code accuracy of 99.89999%** (≈ 99.90%) at a validation CER of just **0.00016675**. It generates **5,000 test predictions** written to [`Result/submission_AryanSharma_24113024.csv`](./Result/submission_AryanSharma_24113024.csv).
 
 **Takeaways**
-- 🪶 The **lightweight CRNN-MobileNet** is the single best model (93.69% acc, 0.0161 CER) at just **1.77M** trainable params — small *and* accurate, so it carries the largest ensemble weight.
-- 🤝 **Ensembling lifts accuracy substantially** — from 90.69% (best single) → **97.40%** (tuned blend).
-- 🧊 The generic **ViT-Small** struggled on this distorted-captcha distribution (data-hungry); the **custom strip-token AdvancedViTCaptcha** is the captcha-specific transformer alternative.
+- 🪶 All three members are **lightweight CRNNs** (2.4M–4.7M params) — small backbones (ShuffleNetV2 / MobileNetV3) paired with a 4-layer BiGRU sequence decoder.
+- 🏅 The **CRNN-MobileNetV3-Large** is the single best member (99.85% acc, 0.0003 CER), so it carries the largest ensemble weight (0.50).
+- 🤝 **Ensembling pushes accuracy to near-perfect** — the weighted soft-vote reaches **99.89999% full-code accuracy** with a character error rate of only **0.0167%**.
 
 ---
 
@@ -121,7 +132,9 @@ VisionDecode/
 │   ├── model4b_advanced_vit.pth
 │   ├── model7_resnet18.pth
 │   ├── model_tinycnn.pth
-│   └── FinalModel_*.pth           # tuned ensemble checkpoints
+│   ├── FinalModel_model1_shufflenetv2.pth        # final ensemble member 1
+│   ├── FinalModel_model2_mobilenet_small.pth     # final ensemble member 2
+│   └── FinalModel_model3_mobilenetlarge_gru.pth  # final ensemble member 3
 ├── NoteBook/
 │   ├── prototype_model.ipynb      # full model zoo + training pipeline
 │   └── Final_Model.ipynb          # self-contained ensemble + submission
@@ -171,7 +184,7 @@ test-1.png,7PSW9D
 
 ## 🛠️ Tech Stack
 
-`PyTorch` · `torchvision` (EfficientNet-B0, MobileNetV3, ResNet) · `timm` (ViT) · `pandas` · `Pillow` · `NumPy`
+`PyTorch` · `torchvision` (EfficientNet-B0, MobileNetV3-Small/Large, ShuffleNetV2, ResNet) · `timm` (ViT) · `pandas` · `Pillow` · `NumPy`
 
 ---
 

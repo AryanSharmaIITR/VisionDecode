@@ -75,7 +75,7 @@ The production model ([`NoteBook/Final_Model.ipynb`](./NoteBook/Final_Model.ipyn
 | Model 3 | `CRNN_CustomModel_light_lstm` — CNN(512) → 4-layer **BiLSTM** | 0.40 | 3.42M |
 
 ```
-prediction = argmax( 0.4·CRNN_CustomModel_light  +  0.2·CRNN_CustomModel  +  0.4·CRNN_CustomModel_light_lstm )   # per character position
+prediction = argmax( 0.5·CRNN_CustomModel_light  +  0.1·CRNN_CustomModel  +  0.4·CRNN_CustomModel_light_lstm )   # per character position
 ```
 
 It is fully self-contained — it redefines the three model classes and all helpers (charset, CER, dataloaders, classifier trainer), trains/loads the checkpoints, reports validation CER/accuracy per-model vs. the blend, and writes the final submission CSV.

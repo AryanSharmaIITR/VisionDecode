@@ -10,7 +10,7 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![torchvision](https://img.shields.io/badge/torchvision-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/vision/)
 [![timm](https://img.shields.io/badge/timm-ViT-blue)](https://github.com/huggingface/pytorch-image-models)
-[![Best Acc](https://img.shields.io/badge/Full--code%20Acc-98.85%25-brightgreen)](#-results)
+[![Best Acc](https://img.shields.io/badge/Full--code%20Acc-98.95%25-brightgreen)](#-results)
 [![License](https://img.shields.io/badge/License-See%20LICENSE-green)](./LICENSE)
 
 **📦 [Dataset + Pretrained Artifacts (Google Drive)](https://drive.google.com/drive/folders/1BmYQBdOoLxwWSHTTVDNipFGZD1N2IcfF?usp=sharing)**
@@ -70,8 +70,8 @@ The production model ([`NoteBook/Final_Model.ipynb`](./NoteBook/Final_Model.ipyn
 
 | Model | Class — backbone → head | Weight | Trainable Params |
 |-------|--------------------------|-------:|-----------------:|
-| Model 1 | `CRNN_CustomModel_light` — CNN(512) → 2-layer **BiGRU** | 0.40 | 2.37M |
-| Model 2 | `CRNN_CustomModel` — CNN(1024) → 4-layer **BiGRU** | 0.20 | 6.24M |
+| Model 1 | `CRNN_CustomModel_light` — CNN(512) → 2-layer **BiGRU** | 0.50 | 2.37M |
+| Model 2 | `CRNN_CustomModel` — CNN(1024) → 4-layer **BiGRU** | 0.10 | 6.24M |
 | Model 3 | `CRNN_CustomModel_light_lstm` — CNN(512) → 4-layer **BiLSTM** | 0.40 | 3.42M |
 
 ```
